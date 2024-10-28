@@ -9,27 +9,29 @@ pipeline {
         }
 
 
+
         stage('Build Docker Image') {
             steps {
-                // Construir imagen usando la nueva dirección de Artifact Registry
-                sh "docker build -t ${GCR_REGISTRY}/api-gateway ."
+                // Construir imagen localmente
+                sh "docker build -t api-gateway ."
             }
         }
 
-        stage('Authenticate and Push Docker Image to Artifact Registry') {
+        stage('Copy Docker Image to VM') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    // Autenticación en Google Cloud y configuración de Docker para Artifact Registry
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                    sh 'gcloud auth configure-docker us-central1-docker.pkg.dev --quiet'
-                    
-                    // Empujar imagen a Artifact Registry
-                    sh "docker push ${GCR_REGISTRY}/api-gateway"
+
+                    // Guardar la imagen en un archivo tar
+                    sh "docker save api-gateway -o api-gateway.tar"
+
+                    // Copiar el archivo de imagen a la instancia de Compute Engine
+                    sh "gcloud compute scp api-gateway.tar ${GCP_INSTANCE}:/home/${USER}/ --zone=${GCP_ZONE} --project=${GCP_PROJECT}"
                 }
             }
         }
 
-        stage('Install Docker if Needed, Authenticate, and Deploy to Google Cloud VM') {
+        stage('Load and Run Docker Image on VM') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
@@ -38,9 +40,8 @@ pipeline {
                             if ! command -v docker &> /dev/null; then
                                 sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker;
                             fi &&
-                            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet &&
-                            sudo docker pull ${GCR_REGISTRY}/api-gateway:latest &&
-                            sudo docker run -d --network='my-network' --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway:latest
+                            sudo docker load -i /home/${USER}/api-gateway.tar &&
+                            sudo docker run -d --name api-gateway -p 3000:3000 api-gateway
                         "
                     """
                 }
