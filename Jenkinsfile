@@ -14,29 +14,31 @@ pipeline {
             }
         }
 
-        stage('Install Docker, Authenticate, and Deploy to Google Cloud VM') {
+
+        stage('Authenticate and Push Docker Image to GCR') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                    sh """
-                        gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
-                        --command="sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker && \
-                                   gcloud auth configure-docker --quiet && \
-                                   sudo docker pull ${GCR_REGISTRY}/api-gateway && \
-                                   sudo docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
-                    """
+                    sh 'gcloud auth configure-docker'
+                    sh "docker push ${GCR_REGISTRY}/api-gateway"
                 }
             }
         }
 
 
-        stage('Install Docker and Deploy to Google Cloud VM') {
+        stage('Install Docker if Needed, Authenticate, and Deploy to Google Cloud VM') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
                     sh """
                         gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
-                        --command="sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker && sudo docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
+                        --command="if ! command -v docker &> /dev/null; then \
+                                      sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker; \
+                                   fi && \
+                                   gcloud auth activate-service-account --key-file=/path/to/credentials.json && \
+                                   gcloud auth configure-docker --quiet && \
+                                   sudo docker pull ${GCR_REGISTRY}/api-gateway && \
+                                   sudo docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
                     """
                 }
             }
