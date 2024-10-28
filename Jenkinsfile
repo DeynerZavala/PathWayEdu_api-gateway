@@ -24,11 +24,14 @@ pipeline {
 
         stage('Push Docker Image to GCR') {
             steps {
-                sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                sh 'gcloud auth configure-docker'
-                sh "docker push ${GCR_REGISTRY}/api-gateway"
+                withCredentials([[$class: 'com.google.jenkins.plugins.credentials.oauth.GoogleRobotPrivateKeyCredentials', credentialsId: 'google-cloud-jenkins']]) {
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                    sh 'gcloud auth configure-docker'
+                    sh "docker push ${GCR_REGISTRY}/api-gateway"
+                }
             }
         }
+
 
         stage('Deploy to Google Cloud VM') {
             steps {
