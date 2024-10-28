@@ -10,17 +10,16 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${GCR_REGISTRY}/api-gateway ."
+                sh "docker build -t ${ARTIFACT_REGISTRY}/api-gateway ."
             }
         }
 
-
-        stage('Authenticate and Push Docker Image to GCR') {
+        stage('Authenticate and Push Docker Image to Artifact Registry') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                    sh 'gcloud auth configure-docker'
-                    sh "docker push ${GCR_REGISTRY}/api-gateway"
+                    sh 'gcloud auth configure-docker us-docker.pkg.dev'
+                    sh "docker push ${ARTIFACT_REGISTRY}/api-gateway"
                 }
             }
         }
