@@ -1,15 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('google-cloud-jenkins')
-        GCP_PROJECT = 'your-gcp-project-id'
-        GCP_ZONE = 'your-gcp-zone'
-        GCP_INSTANCE = 'your-instance-name'
-        DOCKER_NETWORK = 'my-network'
-        GCR_REGISTRY = "gcr.io/${GCP_PROJECT}"
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
@@ -19,17 +10,16 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // Construye y etiqueta la imagen para GCR
                 sh 'docker build -t ${GCR_REGISTRY}/api-gateway .'
             }
         }
 
         stage('Push Docker Image to GCR') {
             steps {
-                script {
-                    // Autenticación con Google Cloud para acceder a GCR
+                withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    // Activar la cuenta de servicio
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
                     sh 'gcloud auth configure-docker'
-                    // Enviar la imagen a GCR
                     sh 'docker push ${GCR_REGISTRY}/api-gateway'
                 }
             }
@@ -37,11 +27,13 @@ pipeline {
 
         stage('Deploy to Google Cloud VM') {
             steps {
-                // Despliega el contenedor desde GCR en la VM de Google Cloud
-                sh """
-                    gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
-                    --command="docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
-                """
+                withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                    sh """
+                        gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
+                        --command="docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
+                    """
+                }
             }
         }
     }
