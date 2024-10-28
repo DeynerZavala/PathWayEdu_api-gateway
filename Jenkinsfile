@@ -25,8 +25,6 @@ pipeline {
             }
         }
 
-
-
         stage('Install Docker if Needed, Authenticate, and Deploy to Google Cloud VM') {
             steps {
                 sh """
