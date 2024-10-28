@@ -14,9 +14,10 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image to GCR') {
+        stage('Authenticate and Push Docker Image to GCR') {
             steps {
-                // Autenticación automática del plugin
+                // Autenticación con Google Cloud antes de hacer push
+                sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
                 sh 'gcloud auth configure-docker'
                 sh "docker push ${GCR_REGISTRY}/api-gateway"
             }
