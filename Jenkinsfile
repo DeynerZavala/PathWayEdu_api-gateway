@@ -37,6 +37,11 @@ pipeline {
                             if ! command -v docker &> /dev/null; then
                                 sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker;
                             fi;
+                                                       
+                            # Crear la red Docker si no existe
+                            if ! docker network inspect $DOCKER_NETWORK} &> /dev/null; then
+                                docker network create my-network;
+                            fi;
                             
                             # Detener y eliminar contenedor api-gateway existente, si está en ejecución
                             if [ \$(docker ps -q -f name=api-gateway) ]; then
@@ -47,7 +52,7 @@ pipeline {
                             sudo docker load -i /home/${USER}/api-gateway.tar;
 
                             # Ejecutar contenedor de api-gateway en el puerto 3000
-                            sudo docker run -d --name api-gateway -p 3000:3000 api-gateway;
+                            sudo docker run -d --name api-gateway --network $DOCKER_NETWORK}-p 3000:3000 api-gateway;
 
                             # Eliminar archivo tar después de cargar la imagen
                             rm /home/${USER}/api-gateway.tar;
