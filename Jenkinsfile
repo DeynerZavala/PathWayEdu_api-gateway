@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/your-org/pathway-edu-api-gateway.git'
+                git 'https://github.com/DeynerZavala/PathWayEdu_api-gateway.git'
             }
         }
 
