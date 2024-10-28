@@ -20,6 +20,7 @@ pipeline {
                 sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
                 sh 'gcloud auth configure-docker'
                 sh "docker push ${GCR_REGISTRY}/api-gateway"
+                }
             }
         }
 
