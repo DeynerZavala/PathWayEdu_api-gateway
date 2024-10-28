@@ -10,7 +10,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${GCR_REGISTRY}/api-gateway ."
+                sh 'docker build -t ${GCR_REGISTRY}/api-gateway .'
             }
         }
 
