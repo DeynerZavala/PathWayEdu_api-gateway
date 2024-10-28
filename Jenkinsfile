@@ -26,13 +26,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to Google Cloud VM') {
+
+        stage('Install Docker and Deploy to Google Cloud VM') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
                     sh """
                         gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
-                        --command="docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
+                        --command="sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker && sudo usermod -aG docker \$USER && newgrp docker && docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
                     """
                 }
             }
