@@ -23,7 +23,7 @@ pipeline {
                     sh "docker save api-gateway -o api-gateway.tar"
 
                     // Copiar el archivo de imagen a la instancia de Compute Engine
-                    sh "gcloud compute scp api-gateway.tar ${GCP_INSTANCE}:/home/usuario-vm/ --zone=${GCP_ZONE} --project=${GCP_PROJECT}"
+                    sh "gcloud compute scp api-gateway.tar ${GCP_INSTANCE}:/home/${VM_USER}/ --zone=${GCP_ZONE} --project=${GCP_PROJECT}"
                 }
             }
         }
@@ -44,13 +44,13 @@ pipeline {
                             fi;
 
                             # Cargar la imagen desde el archivo tar
-                            sudo docker load -i /home/usuario-vm/api-gateway.tar;
+                            sudo docker load -i /home/${VM_USER}/api-gateway.tar;
 
                             # Ejecutar contenedor de api-gateway en el puerto 3000
                             sudo docker run -d --name api-gateway -p 3000:3000 api-gateway;
 
                             # Eliminar archivo tar después de cargar la imagen
-                            rm /home/usuario-vm/api-gateway.tar;
+                            rm /home/${VM_USER}/api-gateway.tar;
                         "
                     """
                 }
