@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    envir
     stages {
         stage('Clone Repository') {
             steps {
@@ -16,12 +16,10 @@ pipeline {
 
         stage('Push Docker Image to GCR') {
             steps {
-                withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    // Activar la cuenta de servicio
-                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                    sh 'gcloud auth configure-docker'
-                    sh 'docker push ${GCR_REGISTRY}/api-gateway'
-                }
+                withCredentials([[$class: 'GoogleServiceAccount', credentialsId: 'google-cloud-jenkins']]) {
+                sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                sh 'gcloud auth configure-docker'
+                sh "docker push ${GCR_REGISTRY}/api-gateway"
             }
         }
 
