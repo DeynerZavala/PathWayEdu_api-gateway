@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    envir
+    
     stages {
         stage('Clone Repository') {
             steps {
