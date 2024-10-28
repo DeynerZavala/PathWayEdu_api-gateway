@@ -16,22 +16,25 @@ pipeline {
 
         stage('Authenticate and Push Docker Image to GCR') {
             steps {
-                // Autenticación con Google Cloud antes de hacer push
-                sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                sh 'gcloud auth configure-docker'
-                sh "docker push ${GCR_REGISTRY}/api-gateway"
+                withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    // Activar la cuenta de servicio usando el archivo de credenciales
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                    sh 'gcloud auth configure-docker'
+                    // Push de la imagen al Google Container Registry
+                    sh "docker push ${GCR_REGISTRY}/api-gateway"
+                }
             }
         }
 
-
-
         stage('Deploy to Google Cloud VM') {
             steps {
-                // Autenticación automática del plugin
-                sh """
-                    gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
-                    --command="docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
-                """
+                withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                    sh """
+                        gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
+                        --command="docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
+                    """
+                }
             }
         }
     }
