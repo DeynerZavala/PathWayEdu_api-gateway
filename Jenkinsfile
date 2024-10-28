@@ -16,11 +16,9 @@ pipeline {
 
         stage('Push Docker Image to GCR') {
             steps {
-                sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                sh """
-                    gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
-                    --command="docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
-                """
+                // Autenticación automática del plugin
+                sh 'gcloud auth configure-docker'
+                sh "docker push ${GCR_REGISTRY}/api-gateway"
             }
         }
 
