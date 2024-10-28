@@ -1,6 +1,6 @@
 pipeline {
     agent any
- 
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -8,11 +8,8 @@ pipeline {
             }
         }
 
-
-
         stage('Build Docker Image') {
             steps {
-                // Construir imagen localmente
                 sh "docker build -t api-gateway ."
             }
         }
@@ -26,7 +23,7 @@ pipeline {
                     sh "docker save api-gateway -o api-gateway.tar"
 
                     // Copiar el archivo de imagen a la instancia de Compute Engine
-                    sh "gcloud compute scp api-gateway.tar ${GCP_INSTANCE}:/home/${USER}/ --zone=${GCP_ZONE} --project=${GCP_PROJECT}"
+                    sh "gcloud compute scp api-gateway.tar ${GCP_INSTANCE}:/home/usuario-vm/ --zone=${GCP_ZONE} --project=${GCP_PROJECT}"
                 }
             }
         }
@@ -39,9 +36,21 @@ pipeline {
                         gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} --command="
                             if ! command -v docker &> /dev/null; then
                                 sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker;
-                            fi &&
-                            sudo docker load -i /home/${USER}/api-gateway.tar &&
-                            sudo docker run -d --name api-gateway -p 3000:3000 api-gateway
+                            fi;
+                            
+                            # Detener y eliminar contenedor api-gateway existente, si está en ejecución
+                            if [ \$(docker ps -q -f name=api-gateway) ]; then
+                                sudo docker stop api-gateway && sudo docker rm api-gateway;
+                            fi;
+
+                            # Cargar la imagen desde el archivo tar
+                            sudo docker load -i /home/usuario-vm/api-gateway.tar;
+
+                            # Ejecutar contenedor de api-gateway en el puerto 3000
+                            sudo docker run -d --name api-gateway -p 3000:3000 api-gateway;
+
+                            # Eliminar archivo tar después de cargar la imagen
+                            rm /home/usuario-vm/api-gateway.tar;
                         "
                     """
                 }
