@@ -26,7 +26,8 @@ pipeline {
         }
 
 
-        stage('Install Docker if Needed, Authenticate, and Deploy to Google Cloud VM') {
+
+        stage('Install Docker if Needed, and Deploy to Google Cloud VM') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
@@ -35,8 +36,6 @@ pipeline {
                         --command="if ! command -v docker &> /dev/null; then \
                                       sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker; \
                                    fi && \
-                                   gcloud auth activate-service-account --key-file=/path/to/credentials.json && \
-                                   gcloud auth configure-docker --quiet && \
                                    sudo docker pull ${GCR_REGISTRY}/api-gateway && \
                                    sudo docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
                     """
