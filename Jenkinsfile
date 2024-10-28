@@ -14,14 +14,17 @@ pipeline {
             }
         }
 
-        stage('Authenticate and Push Docker Image to GCR') {
+        stage('Install Docker, Authenticate, and Deploy to Google Cloud VM') {
             steps {
                 withCredentials([file(credentialsId: 'google-cloud-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-                    // Activar la cuenta de servicio usando el archivo de credenciales
                     sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
-                    sh 'gcloud auth configure-docker'
-                    // Push de la imagen al Google Container Registry
-                    sh "docker push ${GCR_REGISTRY}/api-gateway"
+                    sh """
+                        gcloud compute ssh ${GCP_INSTANCE} --project=${GCP_PROJECT} --zone=${GCP_ZONE} \
+                        --command="sudo apt update && sudo apt install -y docker.io && sudo systemctl start docker && \
+                                   gcloud auth configure-docker --quiet && \
+                                   sudo docker pull ${GCR_REGISTRY}/api-gateway && \
+                                   sudo docker run -d --network=${DOCKER_NETWORK} --name api-gateway -p 3000:3000 ${GCR_REGISTRY}/api-gateway"
+                    """
                 }
             }
         }
