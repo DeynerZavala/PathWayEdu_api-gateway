@@ -41,7 +41,7 @@ pipeline {
                                 docker network create 'my-network';
                             fi;
 
-                            # Detener y eliminar cualquier contenedor existente de api-gateway
+                            # Verificar si el contenedor api-gateway ya existe y detenerlo/eliminarlo si es necesario
                             if [ \$(docker ps -aq -f name=api-gateway) ]; then
                                 echo 'Stopping and removing existing api-gateway container';
                                 sudo docker stop api-gateway && sudo docker rm api-gateway;
