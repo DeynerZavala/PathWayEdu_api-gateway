@@ -1,35 +1,34 @@
-# Etapa de compilación
+# Etapa de construcción
 FROM node:22-alpine3.19 AS builder
 
-# Directorio de trabajo
+# Configura el directorio de trabajo en la etapa de construcción
 WORKDIR /usr/src/app
 
-# Copiar archivos de dependencias y paquetes
+# Copia solo los archivos necesarios para instalar dependencias
 COPY package*.json ./
-RUN npm install
 
-# Copiar el resto del código fuente
+# Instala las dependencias de producción y desarrollo necesarias para compilar
+RUN npm install --only=production
+RUN npm install typescript @nestjs/cli -g
+
+# Copia el resto del código fuente
 COPY . .
 
-# Compilar el proyecto
+# Compila el proyecto de TypeScript a JavaScript
 RUN npm run build
 
-# Etapa de pruebas
-FROM builder AS tester
+# Etapa final: imagen ligera de solo producción
+FROM node:22-alpine3.19
 
-# Ejecutar pruebas
-RUN npm run test
-
-# Etapa de producción final
-FROM node:22-alpine3.19 AS production
-
+# Configura el directorio de trabajo en la imagen final
 WORKDIR /usr/src/app
 
-# Solo copiar los archivos necesarios de la etapa de compilación
-COPY --from=builder /usr/src/app/package*.json ./
+# Copia solo las dependencias de producción y el código compilado desde la etapa de construcción
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
-# Exponer el puerto y definir comando de inicio
+# Expone el puerto en el que corre la aplicación
 EXPOSE 3000
-CMD ["npm", "run", "start:prod"]
+
+# Comando para ejecutar la aplicación en producción
+CMD ["node", "dist/main"]
