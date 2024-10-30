@@ -1,39 +1,35 @@
-# Etapa de construcción
+# Etapa de compilación
 FROM node:22-alpine3.19 AS builder
 
-# Configura el directorio de trabajo
+# Directorio de trabajo
 WORKDIR /usr/src/app
 
-# Copia solo los archivos de dependencias
+# Copiar archivos de dependencias y paquetes
 COPY package*.json ./
-
-# Instala las dependencias de desarrollo y producción
 RUN npm install
 
-# Copia el resto del código fuente
+# Copiar el resto del código fuente
 COPY . .
 
-# Compila el código TypeScript
+# Compilar el proyecto
 RUN npm run build
 
 # Etapa de pruebas
 FROM builder AS tester
 
-# Ejecuta las pruebas
+# Ejecutar pruebas
 RUN npm run test
 
-# Etapa final de producción
-FROM node:22-alpine3.19
+# Etapa de producción final
+FROM node:22-alpine3.19 AS production
 
-# Configura el directorio de trabajo en la imagen final
 WORKDIR /usr/src/app
 
-# Copia solo las dependencias de producción y el código compilado desde la etapa de construcción
+# Solo copiar los archivos necesarios de la etapa de compilación
+COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
-# Expone el puerto en el que corre la aplicación
+# Exponer el puerto y definir comando de inicio
 EXPOSE 3000
-
-# Comando para ejecutar la aplicación en producción
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:prod"]
