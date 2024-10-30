@@ -39,7 +39,7 @@ pipeline {
                             fi;
                                                        
                             # Crear la red Docker si no existe
-                            if ! docker network inspect $DOCKER_NETWORK} &> /dev/null; then
+                            if ! docker network inspect ${DOCKER_NETWORK} &> /dev/null; then
                                 docker network create my-network;
                             fi;
                             
@@ -52,7 +52,7 @@ pipeline {
                             sudo docker load -i /home/${USER}/api-gateway.tar;
 
                             # Ejecutar contenedor de api-gateway en el puerto 3000
-                            sudo docker run -d --name api-gateway --network $DOCKER_NETWORK}-p ${API_GATEWAY_PORT}:3000 api-gateway;
+                            sudo docker run -d --name api-gateway --network ${DOCKER_NETWORK} -p ${API_GATEWAY_PORT}:3000 api-gateway;
 
                             # Eliminar archivo tar después de cargar la imagen
                             rm /home/${USER}/api-gateway.tar;
