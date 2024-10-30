@@ -31,5 +31,4 @@ COPY --from=builder /usr/src/app/dist ./dist
 EXPOSE 3000
 
 # Comando para ejecutar la aplicación en producción
-CMD ["npm", "run", "start:prod"]
-
+CMD ["node", "dist/main"]
