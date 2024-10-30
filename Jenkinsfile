@@ -66,9 +66,9 @@ pipeline {
             steps {
                 script {
                     sh 'docker system prune -a -f --volumes'
+                }
             }
-        }
-                    
+        }           
     }
 
     post {
