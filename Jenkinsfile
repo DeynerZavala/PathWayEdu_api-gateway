@@ -40,16 +40,17 @@ pipeline {
                                 docker network create my-network;
                             fi;
 
-                            # Eliminar cualquier contenedor anterior con el nombre api-gateway
+                            # Forzar la eliminación de cualquier contenedor existente de api-gateway
+                            echo 'Forcefully removing existing api-gateway container (if exists)';
                             sudo docker rm -f api-gateway || true;
 
                             # Cargar la imagen desde el archivo tar
                             echo 'Loading Docker image from /home/jenkins/api-gateway.tar';
                             sudo docker load -i /home/jenkins/api-gateway.tar;
 
-                            # Ejecutar el nuevo contenedor de api-gateway en el puerto 3000 con --rm para autoeliminar al detenerse
+                            # Ejecutar el nuevo contenedor de api-gateway en el puerto 3000
                             echo 'Running api-gateway container on port 3000';
-                            sudo docker run -d --name api-gateway --rm --network my-network -p 3000:3000 api-gateway;
+                            sudo docker run -d --name api-gateway --network my-network -p 3000:3000 api-gateway;
 
                             # Eliminar archivo tar después de cargar la imagen
                             echo 'Removing api-gateway.tar';
