@@ -40,25 +40,20 @@ pipeline {
                                 echo 'Creating Docker network: ${DOCKER_NETWORK}';
                                 docker network create ${DOCKER_NETWORK};
                             fi;
-                            
-                            # Verificar si el contenedor api-gateway está ejecutándose
-                            if [ \$(docker ps -q -f name=api-gateway) ]; then
-                                echo 'Container api-gateway is already running. Skipping creation.';
-                            else
-                                # Detener y eliminar contenedor api-gateway si está detenido
-                                if [ \$(docker ps -aq -f name=api-gateway) ]; then
-                                    echo 'Starting existing stopped api-gateway container';
-                                    sudo docker start api-gateway;
-                                else
-                                    # Cargar la imagen desde el archivo tar
-                                    echo 'Loading Docker image from /home/${USER}/api-gateway.tar';
-                                    sudo docker load -i /home/${USER}/api-gateway.tar;
 
-                                    # Ejecutar contenedor de api-gateway en el puerto 3000
-                                    echo 'Running api-gateway container on port ${API_GATEWAY_PORT}';
-                                    sudo docker run -d --name api-gateway --network ${DOCKER_NETWORK} -p ${API_GATEWAY_PORT}:3000 api-gateway;
-                                fi;
+                            # Detener y eliminar cualquier contenedor existente de api-gateway
+                            if [ \$(docker ps -aq -f name=api-gateway) ]; then
+                                echo 'Stopping and removing existing api-gateway container';
+                                sudo docker stop api-gateway && sudo docker rm api-gateway;
                             fi;
+
+                            # Cargar la imagen desde el archivo tar
+                            echo 'Loading Docker image from /home/${USER}/api-gateway.tar';
+                            sudo docker load -i /home/${USER}/api-gateway.tar;
+
+                            # Ejecutar el nuevo contenedor de api-gateway en el puerto 3000
+                            echo 'Running api-gateway container on port ${API_GATEWAY_PORT}';
+                            sudo docker run -d --name api-gateway --network ${DOCKER_NETWORK} -p ${API_GATEWAY_PORT}:3000 api-gateway;
 
                             # Eliminar archivo tar después de cargar la imagen
                             echo 'Removing api-gateway.tar';
