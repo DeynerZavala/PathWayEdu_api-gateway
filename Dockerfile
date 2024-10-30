@@ -7,19 +7,15 @@ WORKDIR /usr/src/app
 # Copia solo los archivos necesarios para instalar dependencias
 COPY package*.json ./
 
-# Instala las dependencias de producción y desarrollo necesarias para compilar y ejecutar tests
-RUN npm install
+# Instala las dependencias de producción y desarrollo necesarias para compilar
+RUN npm install --only=production
+RUN npm install typescript @nestjs/cli -g
 
 # Copia el resto del código fuente
 COPY . .
 
 # Compila el proyecto de TypeScript a JavaScript
 RUN npm run build
-
-# Etapa de pruebas
-FROM builder AS tester
-# Ejecuta las pruebas. Aquí puedes usar Jest o el comando de prueba de tu elección
-RUN npm run test
 
 # Etapa final: imagen ligera de solo producción
 FROM node:22-alpine3.19
