@@ -29,6 +29,14 @@ import { UserTestResultsGatewayController } from './user-test-results-gateway/us
           port: 3002, // El puerto donde corre Microservicio 2
         },
       },
+      {
+        name: 'MICROSERVICE_3', // Microservicio para usuarios
+        transport: Transport.TCP,
+        options: {
+          host: 'ms3',
+          port: 3003, // El puerto donde corre Microservicio 3
+        },
+      },
     ]),
   ],
   controllers: [
