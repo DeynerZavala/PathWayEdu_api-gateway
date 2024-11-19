@@ -16,9 +16,18 @@ import { Observable } from 'rxjs';
 export class CentroDeEstudioGatewayController {
   constructor(@Inject('MICROSERVICE_3') private readonly client: ClientProxy) {}
 
-  // CREATE: Crear un nuevo CentroDeEstudio
+  // CREATE: Crear un nuevo CentroDeEstudio con los nuevos campos
   @Post()
-  create(@Body() centro: any): Observable<any> {
+  create(
+    @Body()
+    centro: {
+      nombre: string;
+      globalRanking: string;
+      nationalRanking: string;
+      link: string;
+      image: string;
+    },
+  ): Observable<any> {
     return this.client.send({ cmd: 'create_centro_de_estudio' }, centro);
   }
 
@@ -34,11 +43,18 @@ export class CentroDeEstudioGatewayController {
     return this.client.send({ cmd: 'get_centro_de_estudio_by_id' }, id);
   }
 
-  // UPDATE: Actualizar un CentroDeEstudio por ID
+  // UPDATE: Actualizar un CentroDeEstudio por ID, incluyendo los nuevos campos
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body() centro: Partial<any>,
+    @Body()
+    centro: Partial<{
+      nombre: string;
+      globalRanking: string;
+      nationalRanking: string;
+      link: string;
+      image: string;
+    }>,
   ): Observable<any> {
     return this.client.send(
       { cmd: 'update_centro_de_estudio' },

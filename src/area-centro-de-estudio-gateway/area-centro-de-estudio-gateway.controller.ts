@@ -15,20 +15,16 @@ import { Observable } from 'rxjs';
 @Controller('api/area-centro-de-estudios')
 export class AreaCentroDeEstudioGatewayController {
   constructor(
-    @Inject('MICROSERVICE_3')
+    @Inject('AREA_CENTRO_DE_ESTUDIO_SERVICE')
     private readonly client: ClientProxy,
   ) {}
 
   // CREATE: Crear una nueva AreaCentroDeEstudio con ubicación
   @Post()
   create(
-    @Body('area_id') area_id: string,
-    @Body('ubicacion') ubicacion: string,
+    @Body() area: { area_id: string; ubicacion: string; centroDeEstudio: any },
   ): Observable<any> {
-    return this.client.send(
-      { cmd: 'create_area_centro_de_estudio' },
-      { area_id, ubicacion },
-    );
+    return this.client.send({ cmd: 'create_area_centro_de_estudio' }, area);
   }
 
   // READ: Obtener todas las áreas de centro de estudio
@@ -47,12 +43,11 @@ export class AreaCentroDeEstudioGatewayController {
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body('area_id') area_id: string,
-    @Body('ubicacion') ubicacion: string,
+    @Body() area: Partial<{ area_id: string; ubicacion: string }>,
   ): Observable<any> {
     return this.client.send(
       { cmd: 'update_area_centro_de_estudio' },
-      { id, area_id, ubicacion },
+      { id, ...area },
     );
   }
 
