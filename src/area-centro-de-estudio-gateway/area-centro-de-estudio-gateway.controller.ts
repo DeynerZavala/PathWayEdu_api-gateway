@@ -15,7 +15,7 @@ import { Observable } from 'rxjs';
 @Controller('api/area-centro-de-estudios')
 export class AreaCentroDeEstudioGatewayController {
   constructor(
-    @Inject('AREA_CENTRO_DE_ESTUDIO_SERVICE')
+    @Inject('MICROSERVICE_3')
     private readonly client: ClientProxy,
   ) {}
 
