@@ -9,6 +9,8 @@ import { QuestionsGatewayController } from './questions-gateway/questions-gatewa
 import { TestsGatewayController } from './tests-gateway/tests-gateway.controller';
 import { UserTestResponsesGatewayController } from './user-test-responses-gateway/user-test-responses-gateway.controller';
 import { UserTestResultsGatewayController } from './user-test-results-gateway/user-test-results-gateway.controller';
+import { AreaCentroDeEstudioGatewayController } from './area-centro-de-estudio-gateway/area-centro-de-estudio-gateway.controller';
+import { CentroDeEstudioGatewayController } from './centro-de-estudio-gateway/centro-de-estudio.gateway.controller';
 
 @Module({
   imports: [
@@ -49,6 +51,8 @@ import { UserTestResultsGatewayController } from './user-test-results-gateway/us
     TestsGatewayController,
     UserTestResponsesGatewayController,
     UserTestResultsGatewayController,
+    AreaCentroDeEstudioGatewayController,
+    CentroDeEstudioGatewayController,
   ],
 })
 export class AppModule {}
