@@ -54,4 +54,13 @@ export class UsersGatewayController {
   ): Observable<any> {
     return this.microservice1Client.send({ cmd: 'login_user' }, credentials);
   }
+
+  // GET: Obtener usuarios por Ubigeo
+  @Get('ubigeo/:ubigeoId')
+  findByUbigeo(@Param('ubigeoId') ubigeoId: string): Observable<any> {
+    return this.microservice1Client.send(
+      { cmd: 'get_users_by_ubigeo' },
+      ubigeoId,
+    );
+  }
 }
