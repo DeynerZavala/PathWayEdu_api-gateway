@@ -11,6 +11,7 @@ import { UserTestResponsesGatewayController } from './user-test-responses-gatewa
 import { UserTestResultsGatewayController } from './user-test-results-gateway/user-test-results-gateway.controller';
 import { AreaCentroDeEstudioGatewayController } from './area-centro-de-estudio-gateway/area-centro-de-estudio-gateway.controller';
 import { CentroDeEstudioGatewayController } from './centro-de-estudio-gateway/centro-de-estudio.gateway.controller';
+import { UbigeoGatewayController } from './ubigeo-gateway/ubigeo.gateway.controller';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CentroDeEstudioGatewayController } from './centro-de-estudio-gateway/ce
     UserTestResultsGatewayController,
     AreaCentroDeEstudioGatewayController,
     CentroDeEstudioGatewayController,
+    UbigeoGatewayController,
   ],
 })
 export class AppModule {}
