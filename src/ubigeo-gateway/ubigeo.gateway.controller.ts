@@ -1,11 +1,12 @@
 import {
   Controller,
   Get,
-  Post,
-  Delete,
-  Body,
   Param,
+  Post,
+  Body,
+  Delete,
   Inject,
+  Query,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
@@ -16,33 +17,43 @@ export class UbigeoGatewayController {
     @Inject('MICROSERVICE_1') private readonly ubigeoClient: ClientProxy,
   ) {}
 
-  // GET: Obtener todos los Ubigeos
-  @Get()
-  findAll(): Observable<any> {
-    return this.ubigeoClient.send({ cmd: 'get_all_ubigeos' }, {});
+  @Get('countries')
+  getCountries(): Observable<any> {
+    return this.ubigeoClient.send({ cmd: 'get_countries' }, {});
   }
 
-  // GET: Obtener un Ubigeo por ID
+  @Get('departamentos/:countryId')
+  getDepartamentos(@Param('countryId') countryId: string): Observable<any> {
+    return this.ubigeoClient.send({ cmd: 'get_departamentos' }, countryId);
+  }
+
+  @Get('provincias/:departmentId')
+  getProvincias(@Param('departmentId') departmentId: string): Observable<any> {
+    return this.ubigeoClient.send({ cmd: 'get_provincias' }, departmentId);
+  }
+
+  @Get('ciudades/:provinceId')
+  getCiudades(@Param('provinceId') provinceId: string): Observable<any> {
+    return this.ubigeoClient.send({ cmd: 'get_ciudades' }, provinceId);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string): Observable<any> {
-    return this.ubigeoClient.send({ cmd: 'get_ubigeo_by_id' }, id);
+  findUbigeo(@Param('id') id: string): Observable<any> {
+    return this.ubigeoClient.send({ cmd: 'find_ubigeo' }, id);
   }
 
-  // POST: Crear un nuevo Ubigeo
+  @Get('children/:parentId')
+  findChildren(@Param('parentId') parentId: string): Observable<any> {
+    return this.ubigeoClient.send({ cmd: 'find_children' }, parentId);
+  }
+
   @Post()
-  create(@Body() ubigeo: { id: string; name: string }): Observable<any> {
-    return this.ubigeoClient.send({ cmd: 'create_ubigeo' }, ubigeo);
+  createUbigeo(@Body() data: { id: string; name: string }): Observable<any> {
+    return this.ubigeoClient.send({ cmd: 'create_ubigeo' }, data);
   }
 
-  // GET: Obtener hijos de un Ubigeo
-  @Get(':id/children')
-  findChildren(@Param('id') id: string): Observable<any> {
-    return this.ubigeoClient.send({ cmd: 'get_children_by_ubigeo' }, id);
-  }
-
-  // DELETE: Eliminar un Ubigeo por ID
   @Delete(':id')
-  remove(@Param('id') id: string): Observable<any> {
+  deleteUbigeo(@Param('id') id: string): Observable<void> {
     return this.ubigeoClient.send({ cmd: 'delete_ubigeo' }, id);
   }
 }
