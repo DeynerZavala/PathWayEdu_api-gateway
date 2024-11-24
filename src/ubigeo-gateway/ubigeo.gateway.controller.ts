@@ -36,7 +36,10 @@ export class UbigeoGatewayController {
   getCiudades(@Param('provinceId') provinceId: string): Observable<any> {
     return this.ubigeoClient.send({ cmd: 'get_ciudades' }, provinceId);
   }
-
+  @Get()
+  getUbigeo() {
+    return this.ubigeoClient.send({ cmd: 'get_ubigeo' }, {});
+  }
   @Get(':id')
   findUbigeo(@Param('id') id: string): Observable<any> {
     return this.ubigeoClient.send({ cmd: 'find_ubigeo' }, id);
